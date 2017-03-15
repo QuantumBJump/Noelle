@@ -5,6 +5,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 client = discord.Client()
+voice = None
 
 def get_channel_id(server, name):
     for channel in server.channels:
@@ -35,9 +36,13 @@ async def on_message(message):
         await client.send_message(message.channel, 'Done sleeping')
 
     elif message.content.startswith('!join'):
-        channel_name = message.content.split()[1]
+        global voice
+        channel_name = ' '.join(message.content.split()[1:])
         channel_to_join = client.get_channel(get_channel_id(message.server, channel_name))
         await client.send_message(message.channel, 'Joining channel: ' + channel_name)
-        await client.join_voice_channel(channel_to_join)
+        if client.is_voice_connected(message.server):
+            voice = await voice.move_to(channel_to_join)
+        else:
+            voice = await client.join_voice_channel(channel_to_join)
 
 client.run('MjkxMjAxMzkzNDYzOTE4NTk0.C6mB_A.khU5NicYbB_1-erIA7jwd4b5ydM')
